@@ -1,11 +1,4 @@
-:host {
-	display: block;
-	background-color: Canvas;
-}
-
-label {
-	display: block;
-}
+@import url('base-shadow-element.css');
 
 :host(:--started) {
 	background-color: hsl(156 100% 50% / 0.2);

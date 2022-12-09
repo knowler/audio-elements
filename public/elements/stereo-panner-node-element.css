@@ -1,4 +1,1 @@
-:host {
-	display: block;
-	background-color: Canvas;
-}
+@import url('base-shadow-element.css');

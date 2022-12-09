@@ -1,6 +1,7 @@
-import {html, relativeURL} from './utils.js';
+import { BaseShadowElement } from './base-shadow-element.js';
+import {relativeURL} from './utils.js';
 
-export class OscillatorNodeElement extends HTMLElement {
+export class OscillatorNodeElement extends BaseShadowElement {
 	get waveform() {
 		return this.getAttribute('waveform') ?? undefined;
 	}
@@ -45,10 +46,13 @@ export class OscillatorNodeElement extends HTMLElement {
 	}
 
 	get #fieldsetElement() { return this.shadowRoot.querySelector('fieldset'); }
+	get #controlElements() {
+		return this.shadowRoot.querySelector('fieldset')?.elements;
+	}
 
-	template = () => html`
+	template = html => html`
 		<link rel="stylesheet" href="${relativeURL('oscillator-node-element.css')}">
-			<fieldset>
+		<fieldset>
 			<legend>Oscillator</legend>
 			<label>
 				Waveform
@@ -67,9 +71,10 @@ export class OscillatorNodeElement extends HTMLElement {
 				Detune
 				<input name="detune" type="range" min="-100" max="100" value="${this.detune}">
 			</label>
-			<button role="switch" name="toggle">
+			<button type="button" role="switch" name="toggle">
 				Toggle
 			</button>
+			<button type="button" name="remove">Remove</button>
 		</fieldset>
 	`;
 
@@ -79,25 +84,23 @@ export class OscillatorNodeElement extends HTMLElement {
 
 			if (this.parentElement instanceof AudioContextElement) this.destination = this.context.destination;
 			else if ('node' in this.parentElement) this.destination = this.parentElement.node;
-
-			this.attachShadow({mode: 'open'});
-			this.shadowRoot.innerHTML = this.template();
 		}
+		super.connectedCallback();
 
-		this.#disconnectionController = new AbortController();
-		const removeOnDisconnect = {signal: this.#disconnectionController.signal};
+		const removeOnDisconnect = {signal: this.disconnectedSignal};
 
-		const {waveform, frequency, detune, toggle} = this.#fieldsetElement.elements;
+		const {waveform, frequency, detune, toggle, remove} = this.#controlElements;
 
-		frequency.addEventListener('input', this.#handleFrequencyInput.bind(this), removeOnDisconnect);
-		detune.addEventListener('input', this.#handleDetuneInput.bind(this), removeOnDisconnect);
-		waveform.addEventListener('input', this.#handleWaveformInput.bind(this), removeOnDisconnect);
-		toggle.addEventListener('click', this.#handleToggleClick.bind(this), removeOnDisconnect);
+		frequency.addEventListener('input', this.#handleControlEvent.bind(this), removeOnDisconnect);
+		detune.addEventListener('input', this.#handleControlEvent.bind(this), removeOnDisconnect);
+		waveform.addEventListener('input', this.#handleControlEvent.bind(this), removeOnDisconnect);
+		toggle.addEventListener('click', this.#handleControlEvent.bind(this), removeOnDisconnect);
+		remove.addEventListener('click', this.#handleControlEvent.bind(this), removeOnDisconnect);
 	}
 
-	#disconnectionController;
 	disconnectedCallback() {
-		this.#disconnectionController.abort('element disconnected');
+		super.disconnectedCallback();
+		this.node?.disconnect();
 	}
 
 	static observedAttributes = ['waveform', 'frequency', 'detune'];
@@ -120,21 +123,23 @@ export class OscillatorNodeElement extends HTMLElement {
 		}
 	}
 
-	#handleFrequencyInput(event) {
-		this.frequency = Number(event.target.value);
-	}
-
-	#handleDetuneInput(event) {
-		this.detune = Number(event.target.value);
-	}
-
-	#handleWaveformInput(event) {
-		this.waveform = event.target.value; 
-	}
-
-	#handleToggleClick() {
-		if (this.started) this.stop();
-		else this.start();
+	#handleControlEvent(event) {
+		switch (event.target.name) {
+			case 'frequency':
+			case 'detune':
+				this[event.target.name] = Number(event.target.value);
+				break;
+			case 'waveform':
+				this.waveform = event.target.value;
+				break;
+			case 'toggle':
+				if (this.started) this.stop();
+				else this.start();
+				break;
+			case 'remove':
+				this.remove();
+				break;
+		}
 	}
 }
 

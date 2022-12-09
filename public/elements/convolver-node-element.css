@@ -1,11 +1,4 @@
-:host {
-	display: block;
-	background-color: Canvas;
-}
-
-label {
-	display: block;
-}
+@import url('base-shadow-element.css');
 
 slot[name="buffer"] {
 	display: block;

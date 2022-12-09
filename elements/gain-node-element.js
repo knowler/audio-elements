@@ -1,12 +1,12 @@
-import { html, relativeURL } from './utils.js';
+import {BaseShadowElement} from './base-shadow-element.js';
+import { relativeURL } from './utils.js';
 
-export class GainNodeElement extends HTMLElement {
+export class GainNodeElement extends BaseShadowElement {
 	get gain() { return this.node.gain.value; }
 	set gain(value) { this.node.gain.setValueAtTime(value, this.context.currentTime); }
 
-	get #fieldsetElement() { return this.shadowRoot.querySelector('fieldset'); }
-
-	template = () => html`
+	get #controlElements() { return this.shadowRoot.querySelector('fieldset').elements; }
+	template = html => html`
 		<link rel="stylesheet" href="${relativeURL('gain-node-element.css')}">
 		<fieldset>
 			<legend>Gain</legend>
@@ -32,27 +32,33 @@ export class GainNodeElement extends HTMLElement {
 			if (this.parentElement instanceof AudioContextElement) this.destination = this.context.destination;
 			else if ('node' in this.parentElement) this.destination = this.parentElement.node;
 			this.node.connect(this.destination);
-
-			this.attachShadow({ mode: 'open' });
-			this.shadowRoot.innerHTML = this.template();
 		}
+		super.connectedCallback();
 
-		const { gain, mute } = this.#fieldsetElement.elements;
+		for (const control of this.#controlElements) {
+			control.addEventListener('input', this.#handleControlInput.bind(this), {
+				signal: this.disconnectedSignal,
+			});
+		}
+	}
 
-		gain.addEventListener('input', event => {
-			this.mute = false;
-			this.#fieldsetElement.elements.mute.checked = false;
-			this.gain = Number(event.target.value);
-		});
-
-		mute.addEventListener('input', event => {
-			this.mute = event.target.checked;
-			if (this.mute) this.gain = 0;
-			else this.gain = Number(this.#fieldsetElement.elements.gain.value);
-		});
+	#handleControlInput(event) {
+		switch (event.target.name) {
+			case 'gain':
+				this.mute = false;
+				this.#controlElements.mute.checked = false;
+				this.gain = Number(event.target.value);
+				break;
+			case 'mute':
+				this.mute = event.target.checked;
+				if (this.mute) this.gain = 0;
+				else this.gain = Number(this.#controlElements.gain.value);
+				break;
+		}
 	}
 
 	disconnectedCallback() {
+		super.disconnectedCallback();
 		this.node.disconnect();
 	}
 
