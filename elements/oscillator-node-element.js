@@ -27,7 +27,8 @@ export class OscillatorNodeElement extends BaseShadowElement {
 	}
 
 	started = false;
-	start() {
+	async start() {
+		await this.context.resume();
 		this.node?.stop();
 		this.node = new OscillatorNode(this.context, {
 			type: this.waveform,
