@@ -1,4 +1,4 @@
-import { html, relativeURL } from "./utils";
+import { html, relativeURL } from "./utils.js";
 
 export class ConvolverNodeElement extends HTMLElement {
 	get normalize() { return this.hasAttribute('normalize'); }

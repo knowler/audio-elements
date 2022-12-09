@@ -1,6 +1,7 @@
-import { html, relativeURL } from "./utils";
+import { BaseShadowElement } from './base-shadow-element.js';
+import { relativeURL } from "./utils.js";
 
-export class BiquadFilterNodeElement extends HTMLElement {
+export class BiquadFilterNodeElement extends BaseShadowElement {
 	static types = ['lowpass', 'highpass', 'bandpass', 'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass'];
 	type = 'lowpass';
 	get type() { return this.getAttribute('type') ?? undefined; }
@@ -33,8 +34,8 @@ export class BiquadFilterNodeElement extends HTMLElement {
 		this.node?.frequency.setValueAtTime(Number(value), this.context.currentTime);
 	}
 
-	get #fieldsetElement() { return this.shadowRoot.querySelector('fieldset'); }
-	template = () => html`
+	get #controlElements() { return this.shadowRoot.querySelector('fieldset').elements; }
+	template = html => html`
 		<link rel="stylesheet" href="${relativeURL('biquad-filter-node-element.css')}">
 		<fieldset>
 			<legend>Biquad Filter</legend>
@@ -65,17 +66,14 @@ export class BiquadFilterNodeElement extends HTMLElement {
 			if (this.parentElement instanceof AudioContextElement) this.destination = this.context.destination;
 			else if ('node' in this.parentElement) this.destination = this.parentElement.node;
 			this.node.connect(this.destination);
-
-			this.attachShadow({mode: 'open'});
-			this.shadowRoot.innerHTML = this.template();
-
-			this.#setApplicableControls();
 		}
 
-		this.#disconnectedController = new AbortController();
-		for (const control of this.#fieldsetElement.elements) {
+		super.connectedCallback();
+		this.#setApplicableControls();
+
+		for (const control of this.#controlElements) {
 			control.addEventListener('input', this.#handleControlInput.bind(this), {
-				signal: this.#disconnectedController.signal,
+				signal: this.disconnectedSignal,
 			});
 		}
 	}
@@ -84,27 +82,26 @@ export class BiquadFilterNodeElement extends HTMLElement {
 		switch (this.type) {
 			case 'lowshelf': // q not used
 			case 'highshelf': // q not used
-				this.#fieldsetElement.elements.namedItem('q').disabled = true;
-				this.#fieldsetElement.elements.namedItem('gain').disabled = false;
+				this.#controlElements.namedItem('q').disabled = true;
+				this.#controlElements.namedItem('gain').disabled = false;
 			break;
 			case 'notch':
 			case 'allpass':
 			case 'lowpass':
 			case 'highpass':
 			case 'bandpass':
-				this.#fieldsetElement.elements.namedItem('gain').disabled = true;
-				this.#fieldsetElement.elements.namedItem('q').disabled = false;
+				this.#controlElements.namedItem('gain').disabled = true;
+				this.#controlElements.namedItem('q').disabled = false;
 			break;
 			case 'peaking':
-				this.#fieldsetElement.elements.namedItem('gain').disabled = false;
-				this.#fieldsetElement.elements.namedItem('q').disabled = false;
+				this.#controlElements.namedItem('gain').disabled = false;
+				this.#controlElements.namedItem('q').disabled = false;
 			break;
 		}
 	}
 
-	#disconnectedController;
 	disconnectedCallback() {
-		this.#disconnectedController.abort('element disconnected');
+		super.disconnectedCallback();
 		this.node.disconnect();
 	}
 
