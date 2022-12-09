@@ -139,7 +139,7 @@ export class OscillatorNodeElement extends HTMLElement {
 }
 
 if (!window.customElements.get('oscillator-node')) {
-	await window.customElements.whenDefined('audio-context');
+	window.customElements.whenDefined('audio-context');
 	window.OscillatorNodeElement = OscillatorNodeElement;
 	window.customElements.define('oscillator-node', OscillatorNodeElement);
 }
