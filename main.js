@@ -1,23 +1,18 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import { setupCounter } from './counter.js'
+const customElements = [
+	'audio-context',
+	'biquad-filter-node',
+	'gain-node',
+	'oscillator-node',
+	'stereo-panner-node',
+	'convolver-node',
+];
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+await Promise.all(
+	customElements.map(
+		customElement => window.customElements.whenDefined(customElement),
+	),
+);
 
-setupCounter(document.querySelector('#counter'))
+document.body.appendChild(
+	document.querySelector('template').content.cloneNode(true),
+);

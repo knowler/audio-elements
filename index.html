@@ -1,13 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/main.js"></script>
-  </body>
+<!doctype html>
+<html lang="en-ca">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Audio Web Components</title>
+		<link rel="stylesheet" href="/main.css">
+		<script type="module" src="/elements/gain-node-element.js"></script>
+		<script type="module" src="/elements/stereo-panner-node-element.js"></script>
+		<script type="module" src="/elements/biquad-filter-node-element.js"></script>
+		<script type="module" src="/elements/oscillator-node-element.js"></script>
+		<script type="module" src="/elements/convolver-node-element.js"></script>
+		<script type="module" src="/elements/audio-context-element.js"></script>
+		<script type="module" src="/main.js"></script>
+	</head>
+	<body>
+		<template>
+			<audio-context>
+				<gain-node>
+					<stereo-panner-node>
+						<biquad-filter-node>
+							<oscillator-node></oscillator-node>
+							<oscillator-node></oscillator-node>
+						</biquad-filter-node>
+					</stereo-panner-node>
+				</gain-node>
+			</audio-context>
+		</template>
+	</body>
 </html>

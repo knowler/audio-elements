@@ -1,0 +1,14 @@
+:host {
+	display: block;
+	background-color: Canvas;
+}
+
+label {
+	display: block;
+}
+
+slot[name="buffer"] {
+	display: block;
+	border: 1px solid black;
+	padding: 0.5em;
+}

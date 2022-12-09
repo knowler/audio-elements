@@ -1,0 +1,16 @@
+:host {
+	display: block;
+	background-color: Canvas;
+}
+
+label {
+	display: block;
+}
+
+:host(:--started) {
+	background-color: hsl(156 100% 50% / 0.2);
+}
+
+:host(:--stopped) {
+	background-color: hsl(1 100% 50% / 0.2);
+}
