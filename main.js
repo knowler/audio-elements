@@ -12,7 +12,7 @@ await Promise.all(
 		customElement => window.customElements.whenDefined(customElement),
 	),
 );
-
+console.log('custom elements defined');
 document.body.appendChild(
 	document.querySelector('template').content.cloneNode(true),
 );
