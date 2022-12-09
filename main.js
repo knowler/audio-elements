@@ -4,7 +4,7 @@ const customElements = [
 	'gain-node',
 	'oscillator-node',
 	'stereo-panner-node',
-	'convolver-node',
+	//'convolver-node',
 ];
 
 await Promise.all(
