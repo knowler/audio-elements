@@ -7,13 +7,14 @@ const customElements = [
 	//'convolver-node',
 ];
 
-performance.mark('custom elements');
+performance.mark('waiting');
 await Promise.all(
 	customElements.map(
 		customElement => window.customElements.whenDefined(customElement),
 	),
 );
-performance.mark('custom elements');
+performance.mark('defined');
+performance.measure('custom elements to be defined', 'waiting', 'defined')
 document.body.appendChild(
 	document.querySelector('template').content.cloneNode(true),
 );
