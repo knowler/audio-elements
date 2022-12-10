@@ -1,4 +1,4 @@
-@import url('base-shadow-element.css');
+@import url('base-audio-node-element.css');
 
 :host(:--started) {
 	background-color: hsl(156 100% 50% / 0.2);

@@ -1,7 +1,7 @@
-import { BaseShadowElement } from './base-shadow-element.js';
+import { BaseAudioNodeElement } from './base-audio-node-element.js';
 import { relativeURL } from "./utils.js";
 
-export class BiquadFilterNodeElement extends BaseShadowElement {
+export class BiquadFilterNodeElement extends BaseAudioNodeElement {
 	static types = ['lowpass', 'highpass', 'bandpass', 'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass'];
 	type = 'lowpass';
 	get type() { return this.getAttribute('type') ?? undefined; }
@@ -34,7 +34,6 @@ export class BiquadFilterNodeElement extends BaseShadowElement {
 		this.node?.frequency.setValueAtTime(Number(value), this.context.currentTime);
 	}
 
-	get #controlElements() { return this.shadowRoot.querySelector('fieldset').elements; }
 	template = html => html`
 		<link rel="stylesheet" href="${relativeURL('biquad-filter-node-element.css')}">
 		<fieldset>
@@ -53,25 +52,19 @@ export class BiquadFilterNodeElement extends BaseShadowElement {
 	`;
 
 	connectedCallback() {
-		if (!this.shadowRoot) {
-			this.context = this.closest('audio-context').context;
-			this.node = new BiquadFilterNode(this.context, {
-				type: this.type,
-				frequency: this.frequency,
-				detune: this.detune,
-				Q: this.Q,
-				gain: this.gain,
-			});
-
-			if (this.parentElement instanceof AudioContextElement) this.destination = this.context.destination;
-			else if ('node' in this.parentElement) this.destination = this.parentElement.node;
-			this.node.connect(this.destination);
-		}
-
 		super.connectedCallback();
+
+		this.node = new BiquadFilterNode(this.context, {
+			type: this.type,
+			frequency: this.frequency,
+			detune: this.detune,
+			Q: this.Q,
+			gain: this.gain,
+		});
+		this.node.connect(this.destination);
 		this.#setApplicableControls();
 
-		for (const control of this.#controlElements) {
+		for (const control of this.controlElements) {
 			control.addEventListener('input', this.#handleControlInput.bind(this), {
 				signal: this.disconnectedSignal,
 			});
@@ -82,27 +75,22 @@ export class BiquadFilterNodeElement extends BaseShadowElement {
 		switch (this.type) {
 			case 'lowshelf': // q not used
 			case 'highshelf': // q not used
-				this.#controlElements.namedItem('q').disabled = true;
-				this.#controlElements.namedItem('gain').disabled = false;
+				this.controlElements.namedItem('q').disabled = true;
+				this.controlElements.namedItem('gain').disabled = false;
 			break;
 			case 'notch':
 			case 'allpass':
 			case 'lowpass':
 			case 'highpass':
 			case 'bandpass':
-				this.#controlElements.namedItem('gain').disabled = true;
-				this.#controlElements.namedItem('q').disabled = false;
+				this.controlElements.namedItem('gain').disabled = true;
+				this.controlElements.namedItem('q').disabled = false;
 			break;
 			case 'peaking':
-				this.#controlElements.namedItem('gain').disabled = false;
-				this.#controlElements.namedItem('q').disabled = false;
+				this.controlElements.namedItem('gain').disabled = false;
+				this.controlElements.namedItem('q').disabled = false;
 			break;
 		}
-	}
-
-	disconnectedCallback() {
-		super.disconnectedCallback();
-		this.node.disconnect();
 	}
 
 	static observedAttributes = ['type', 'frequency', 'detune', 'gain', 'q']

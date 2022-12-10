@@ -1,15 +1,14 @@
-import { html, relativeURL } from "./utils.js";
+import {BaseAudioNodeElement} from './base-audio-node-element.js';
+import {relativeURL} from "./utils.js";
 
-export class ConvolverNodeElement extends HTMLElement {
+export class ConvolverNodeElement extends BaseAudioNodeElement {
 	get normalize() { return this.hasAttribute('normalize'); }
 	set normalize(value) {
 		this.toggleAttribute('normalize', value);
 		this.node.normalize = value;
 	}
 
-	get #fieldsetElement() { return this.shadowRoot.querySelector('fieldset'); }
-
-	template = () => html`
+	template = html => html`
 		<link rel="stylesheet" href="${relativeURL('convolver-node-element.css')}">
 		<fieldset>
 			<legend>Convolver</legend>
@@ -21,32 +20,18 @@ export class ConvolverNodeElement extends HTMLElement {
 		</fieldset>
 	`;
 	connectedCallback() {
-		if (!this.shadowRoot) {
-			this.context = this.closest('audio-context').context;
-			this.node = new ConvolverNode(this.context, {
-				disableNormalization: !this.normalize,
-			});
+		super.connectedCallback();
 
-			if (this.parentElement instanceof AudioContextElement) this.destination = this.context.destination;
-			else if ('node' in this.parentElement) this.destination = this.parentElement.node;
-			this.node.connect(this.destination);
+		this.node = new ConvolverNode(this.context, {
+			disableNormalization: !this.normalize,
+		});
+		this.node.connect(this.destination);
 
-			this.attachShadow({mode: 'open'});
-			this.shadowRoot.innerHTML = this.template();
-		}
-
-		this.#disconnectionController = new AbortController();
-		for (const control of this.#fieldsetElement.elements) {
+		for (const control of this.controlElements) {
 			control.addEventListener('input', this.#handleControlInput.bind(this), {
-				signal: this.#disconnectionController.signal,
+				signal: this.disconnectedSignal,
 			});
 		}
-	}
-
-	#disconnectionController;
-	disconnectedCallback() {
-		this.#disconnectionController.abort('element disconnected');
-		this.node.disconnect();
 	}
 
 	static observedAttributes = ['disable-normalization'];

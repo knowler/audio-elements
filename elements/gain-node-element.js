@@ -1,11 +1,13 @@
-import {BaseShadowElement} from './base-shadow-element.js';
+import {BaseAudioNodeElement} from './base-audio-node-element.js';
 import { relativeURL } from './utils.js';
 
-export class GainNodeElement extends BaseShadowElement {
-	get gain() { return this.node.gain.value; }
-	set gain(value) { this.node.gain.setValueAtTime(value, this.context.currentTime); }
+export class GainNodeElement extends BaseAudioNodeElement {
+	get gain() { return this.getAttribute('gain'); }
+	set gain(value) {
+		this.setAttribute('gain', value);
+		this.node.gain.setValueAtTime(value, this.context.currentTime);
+	}
 
-	get #controlElements() { return this.shadowRoot.querySelector('fieldset').elements; }
 	template = html => html`
 		<link rel="stylesheet" href="${relativeURL('gain-node-element.css')}">
 		<fieldset>
@@ -23,19 +25,14 @@ export class GainNodeElement extends BaseShadowElement {
 	`;
 
 	connectedCallback() {
-		if (!this.shadowRoot) {
-			this.context = this.closest('audio-context').context;
-			this.node = new GainNode(this.context, {
-				gain: Number(this.getAttribute('gain')) || undefined,
-			});
-
-			if (this.parentElement instanceof AudioContextElement) this.destination = this.context.destination;
-			else if ('node' in this.parentElement) this.destination = this.parentElement.node;
-			this.node.connect(this.destination);
-		}
 		super.connectedCallback();
 
-		for (const control of this.#controlElements) {
+		this.node = new GainNode(this.context, {
+			gain: Number(this.getAttribute('gain')) || undefined,
+		});
+		this.node.connect(this.destination);
+
+		for (const control of this.controlElements) {
 			control.addEventListener('input', this.#handleControlInput.bind(this), {
 				signal: this.disconnectedSignal,
 			});
@@ -46,20 +43,15 @@ export class GainNodeElement extends BaseShadowElement {
 		switch (event.target.name) {
 			case 'gain':
 				this.mute = false;
-				this.#controlElements.mute.checked = false;
+				this.controlElements.mute.checked = false;
 				this.gain = Number(event.target.value);
 				break;
 			case 'mute':
 				this.mute = event.target.checked;
 				if (this.mute) this.gain = 0;
-				else this.gain = Number(this.#controlElements.gain.value);
+				else this.gain = Number(this.controlElements.gain.value);
 				break;
 		}
-	}
-
-	disconnectedCallback() {
-		super.disconnectedCallback();
-		this.node.disconnect();
 	}
 
 	static observedAttributes = ['gain'];
