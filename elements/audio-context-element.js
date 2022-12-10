@@ -1,11 +1,14 @@
+import { relativeURL } from "./utils";
+const html = String.raw;
+
 export class AudioContextElement extends HTMLElement {
 	context = new AudioContext();
 
 	connectedCallback() {
 		if (!this.shadowRoot) {
 			this.attachShadow({mode: 'open'});
-			this.shadowRoot.innerHTML = `
-				<link rel="stylesheet" href="/elements/audio-context-element.css">
+			this.shadowRoot.innerHTML = html`
+				<link rel="stylesheet" href="${relativeURL('audio-context-element.css')}">
 				<slot></slot>
 			`;
 		}
