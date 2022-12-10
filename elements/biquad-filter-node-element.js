@@ -45,8 +45,8 @@ export class BiquadFilterNodeElement extends BaseAudioNodeElement {
 			</label>
 			<label>Frequency <input type="range" name="frequency" min="0" max="3000" value="${this.frequency ?? 350}"></label>
 			<label>Detune <input type="range" name="detune" value="${this.detune ?? 0}"></label>
-			<label>Q <input type="range" name="q" min="0.0001" max="1000" value="${this.q ?? 1}"></label>
-			<label>Gain <input type="range" name="gain" min="-1" max="2" value="${this.gain ?? 1}"></label>
+			<label>Q <input type="range" name="Q" min="0.0001" max="1000" step="0.0001" value="${this.q ?? 1}"></label>
+			<label>Gain <input type="range" name="gain" min="-1" max="5" step="0.01" value="${this.gain ?? 1}"></label>
 			<slot></slot>
 		</fieldset>
 	`;
@@ -75,7 +75,7 @@ export class BiquadFilterNodeElement extends BaseAudioNodeElement {
 		switch (this.type) {
 			case 'lowshelf': // q not used
 			case 'highshelf': // q not used
-				this.controlElements.namedItem('q').disabled = true;
+				this.controlElements.namedItem('Q').disabled = true;
 				this.controlElements.namedItem('gain').disabled = false;
 			break;
 			case 'notch':
@@ -84,11 +84,11 @@ export class BiquadFilterNodeElement extends BaseAudioNodeElement {
 			case 'highpass':
 			case 'bandpass':
 				this.controlElements.namedItem('gain').disabled = true;
-				this.controlElements.namedItem('q').disabled = false;
+				this.controlElements.namedItem('Q').disabled = false;
 			break;
 			case 'peaking':
 				this.controlElements.namedItem('gain').disabled = false;
-				this.controlElements.namedItem('q').disabled = false;
+				this.controlElements.namedItem('Q').disabled = false;
 			break;
 		}
 	}
@@ -104,8 +104,10 @@ export class BiquadFilterNodeElement extends BaseAudioNodeElement {
 			case 'frequency':
 			case 'detune':
 			case 'gain':
-			case 'q':
 				this[name] = Number(newValue);
+				break;
+			case 'q':
+				this.Q = Number(newValue);
 				break;
 		}
 	}
@@ -119,7 +121,7 @@ export class BiquadFilterNodeElement extends BaseAudioNodeElement {
 			case 'frequency':
 			case 'detune':
 			case 'gain':
-			case 'q':
+			case 'Q':
 				this[event.target.name] = Number(event.target.value);
 				break;
 		}
