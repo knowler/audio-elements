@@ -34,7 +34,7 @@ export class ConvolverNodeElement extends BaseAudioNodeElement {
 		}
 	}
 
-	static observedAttributes = ['disable-normalization'];
+	static observedAttributes = ['normalize'];
 	attributeChangedCallback(name, oldValue, newValue) {
 		if (!this.isConnected || !this.context || oldValue === newValue) return;
 
