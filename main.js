@@ -1,20 +1,11 @@
-const customElements = [
-	'audio-context',
-	'biquad-filter-node',
-	'gain-node',
-	'oscillator-node',
-	'stereo-panner-node',
-	//'convolver-node',
-];
+const template = document.querySelector('template');
 
-performance.mark('waiting');
 await Promise.all(
-	customElements.map(
-		customElement => window.customElements.whenDefined(customElement),
-	),
+	Array
+		// Get all the unique custom elements in the template
+		.from(template.content.querySelectorAll(':not(:defined):first-of-type'))
+		// Use the tag names to get the whenDefined promises
+		.map(customElement => window.customElements.whenDefined(customElement.tagName.toLowerCase())),
 );
-performance.mark('defined');
-performance.measure('custom elements to be defined', 'waiting', 'defined')
-document.body.appendChild(
-	document.querySelector('template').content.cloneNode(true),
-);
+
+document.body.appendChild(template.content.cloneNode(true));
