@@ -1,9 +1,20 @@
 @import url('base-audio-node-element.css');
 
-:host(:--started) {
-	background-color: hsl(156 100% 50% / 0.2);
+button[aria-checked="true"] {
+	color-scheme: dark;
 }
 
-:host(:--stopped) {
-	background-color: hsl(1 100% 50% / 0.2);
+button[aria-checked="false"] {
+	color-scheme: light;
 }
+
+@media (prefers-color-scheme: dark) {
+	button[aria-checked="true"] {
+		color-scheme: light;
+	}
+
+	button[aria-checked="false"] {
+		color-scheme: dark;
+	}
+}
+

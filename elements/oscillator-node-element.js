@@ -57,7 +57,7 @@ export class OscillatorNodeElement extends BaseAudioNodeElement {
 					<option ${this.waveform === "square" ? "selected" : ""} value="square">Square</option>
 					<option ${this.waveform === "sawtooth" ? "selected" : ""} value="sawtooth">Sawtooth</option>
 					<option ${this.waveform === "triangle" ? "selected" : ""} value="triangle">Triangle</option>
-				</select
+				</select>
 			</label>
 			<label>
 				Frequency
@@ -67,7 +67,7 @@ export class OscillatorNodeElement extends BaseAudioNodeElement {
 				Detune
 				<input name="detune" type="range" min="-100" max="100" value="${this.detune}">
 			</label>
-			<button type="button" role="switch" name="toggle">
+			<button type="button" name="toggle" role="switch" aria-checked="false">
 				Toggle
 			</button>
 			<button type="button" name="remove">Remove</button>
@@ -116,6 +116,12 @@ export class OscillatorNodeElement extends BaseAudioNodeElement {
 				this.waveform = event.target.value;
 				break;
 			case 'toggle':
+				event.currentTarget.setAttribute(
+					'aria-checked',
+					JSON.stringify(!JSON.parse(
+						event.currentTarget.getAttribute('aria-checked')
+					)),
+				);
 				if (this.started) this.stop();
 				else this.start();
 				break;
