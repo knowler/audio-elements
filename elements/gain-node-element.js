@@ -19,7 +19,7 @@ export class GainNodeElement extends BaseAudioNodeElement {
 					<option value="2" label="max"></option>
 				</datalist>
 			</label>
-			<label>Mute <input type="checkbox" name="mute"></label>
+			<button type="button" name="mute" role="switch" aria-checked="false">Mute</button>
 			<slot></slot>
 		</fieldset>
 	`;
@@ -32,26 +32,27 @@ export class GainNodeElement extends BaseAudioNodeElement {
 		});
 		this.node.connect(this.destination);
 
-		for (const control of this.controlElements) {
-			control.addEventListener('input', this.#handleControlInput.bind(this), {
-				signal: this.disconnectedSignal,
-			});
-		}
+		const {gain, mute} = this.controlElements;
+		gain.addEventListener('input', this.#handleGainInput.bind(this), {
+			signal: this.disconnectedSignal,
+		});
+		mute.addEventListener('click', this.#handleMuteClick.bind(this), {
+			signal: this.disconnectedSignal,
+		});
 	}
 
-	#handleControlInput(event) {
-		switch (event.target.name) {
-			case 'gain':
-				this.mute = false;
-				this.controlElements.mute.checked = false;
-				this.gain = Number(event.target.value);
-				break;
-			case 'mute':
-				this.mute = event.target.checked;
-				if (this.mute) this.gain = 0;
-				else this.gain = Number(this.controlElements.gain.value);
-				break;
-		}
+	#handleGainInput(event) {
+		this.mute = false;
+		this.controlElements.mute.setAttribute('aria-checked', 'false');
+		this.gain = Number(event.target.value);
+	}
+
+	#handleMuteClick(event) {
+		const wasMuted = JSON.parse(event.currentTarget.getAttribute('aria-checked'));
+		event.currentTarget.setAttribute('aria-checked', JSON.stringify(!wasMuted));
+		this.mute = !wasMuted;
+		if (this.mute) this.gain = 0;
+		else this.gain = Number(this.controlElements.gain.value);
 	}
 
 	static observedAttributes = ['gain'];
