@@ -22,3 +22,22 @@ slot:not([name]) {
 	display: grid;
 	gap: 0.5em;
 }
+
+button[aria-checked="true"] {
+	color-scheme: dark;
+}
+
+button[aria-checked="false"] {
+	color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+	button[aria-checked="true"] {
+		color-scheme: light;
+	}
+
+	button[aria-checked="false"] {
+		color-scheme: dark;
+	}
+}
+
