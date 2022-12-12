@@ -80,7 +80,7 @@ export class OscillatorNodeElement extends BaseAudioNodeElement {
 				break;
 		}
 		// Update control
-		this.controlElements.namedItem(name).value = normalized;
+		if (this.isConnected) this.controlElements.namedItem(name).value = normalized;
 	}
 	get type() {
 		return this.getAttribute('type') ?? 'sine';
@@ -89,13 +89,13 @@ export class OscillatorNodeElement extends BaseAudioNodeElement {
 		this.setAttribute('type', value);
 	}
 	get frequency() {
-		return this.getAttribute('frequency') ?? 440;
+		return Number(this.getAttribute('frequency') ?? 440);
 	}
 	set frequency(value) {
 		this.setAttribute('frequency', value);
 	}
 	get detune() {
-		return this.getAttribute('detune') ?? 0;
+		return Number(this.getAttribute('detune') ?? 0);
 	}
 	set detune(value) {
 		this.setAttribute('detune', value);
